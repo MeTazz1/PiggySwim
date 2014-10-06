@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>9E27EF27-46BD-42C0-AADB-EEA8FA9E9444</string>
+	<key>IDESourceControlProjectName</key>
+	<string>SKTest</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>D33709A1384A09D2C07602F876608BD6C8F33669</key>
+		<string>https://github.com/christophedellac/PiggySwim</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>SKTest.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>D33709A1384A09D2C07602F876608BD6C8F33669</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/christophedellac/PiggySwim</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>D33709A1384A09D2C07602F876608BD6C8F33669</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>D33709A1384A09D2C07602F876608BD6C8F33669</string>
+			<key>IDESourceControlWCCName</key>
+			<string>PiggySwim</string>
+		</dict>
+	</array>
+</dict>
+</plist>

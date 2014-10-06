@@ -17,6 +17,10 @@
     SKSpriteNode *_background2;
     SKSpriteNode *_menuView;
     
+    
+    NSArray *_bubbleFrames;
+    SKSpriteNode *_bubbles;
+    
     NSMutableArray *_nodeList;
     NSMutableArray *_fireballList;
     
@@ -30,7 +34,7 @@
 }
 
 @property (nonatomic) AVAudioPlayer *splashPlayer;
-@property (nonatomic, retain) SKSpriteNode *ship;
+@property (nonatomic, retain) SKSpriteNode *turtle;
 @property (nonatomic, retain) ADBannerView *adBannerView;
 
 + (SKScene*)sceneWithSize:(CGSize)size forParentController:(UIViewController*)controller;

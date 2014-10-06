@@ -12,6 +12,9 @@
 @interface ResultViewController ()
 
 @property (nonatomic, retain) IBOutlet UILabel *pointLabel;
+@property (nonatomic, retain) IBOutlet UIButton *playButton;
+@property (nonatomic, retain) IBOutlet UIButton *shareButton;
+@property (nonatomic, retain) IBOutlet UIView *backgroundView;
 
 @end
 
@@ -32,8 +35,11 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [_pointLabel setText:[NSString stringWithFormat:@"You scored %d points bro", _count]];
+    [_pointLabel setText:[NSString stringWithFormat:@"You scored %d points", _count]];
     // Do any additional setup after loading the view from its nib.
+    _backgroundView.layer.cornerRadius = 10.0f;
+    _backgroundView.clipsToBounds = YES;
+    self.view.opaque = NO;
 }
 
 - (void)didReceiveMemoryWarning

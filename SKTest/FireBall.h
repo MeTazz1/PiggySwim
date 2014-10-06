@@ -15,7 +15,15 @@ typedef enum
     Right
 } FireBallDirection;
 
+typedef enum
+{
+    BOTTOM,
+    TOP
+} FireBallOrientation;
+
 @interface FireBall : SKSpriteNode
 
 @property (nonatomic) FireBallDirection direction;
+@property (nonatomic) FireBallOrientation orientation;
+
 @end

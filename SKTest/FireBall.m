@@ -11,5 +11,6 @@
 @implementation FireBall
 
 @synthesize direction = _direction;
+@synthesize orientation = _orientation;
 
 @end

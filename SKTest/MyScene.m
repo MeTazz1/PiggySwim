@@ -17,7 +17,7 @@
 
 @implementation MyScene
 
-@synthesize ship = _ship;
+@synthesize turtle = _turtle;
 @synthesize splashPlayer = _splashPlayer;
 
 static const uint32_t playerCategory    =  0x1 << 0;
@@ -33,6 +33,37 @@ static UIViewController *_controller;
     return [MyScene sceneWithSize:size];
 }
 
+-(id)initWithSize:(CGSize)size {
+    if (self = [super initWithSize:size]) {
+        /* Setup your scene here */
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(replayAfterResult) name:@"kReplayGame" object:nil];
+        
+        NSError *error;
+        NSURL * backgroundMusicURL = [[NSBundle mainBundle] URLForResource:@"Game-Break" withExtension:@"mp3"];
+        _splashPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:backgroundMusicURL error:&error];
+        _splashPlayer.numberOfLoops = 1;
+        [_splashPlayer prepareToPlay];
+        
+        NSMutableArray *bubbleFrames = [NSMutableArray new];
+        SKTextureAtlas *bubbleAnimated = [SKTextureAtlas atlasNamed:@"Bubbles"];
+        NSInteger numImages = bubbleAnimated.textureNames.count;
+        
+        for (int i = 1; i < numImages; ++i)
+        {
+            NSString *textureName = [NSString stringWithFormat:@"bubble%d.png", i];
+            SKTexture *tmp = [bubbleAnimated textureNamed:textureName];
+            [bubbleFrames addObject:tmp];
+        }
+        _bubbleFrames = bubbleFrames;
+        _bubbles = [SKSpriteNode spriteNodeWithTexture:_bubbleFrames[0]];
+        _bubbles.xScale = 0.2;
+        _bubbles.yScale = 0.2;
+        [self createAdBannerView];
+        [self initMenuView];
+    }
+    return self;
+}
 
 #pragma mark - 
 #pragma mark - Menu stuff
@@ -50,15 +81,15 @@ static UIViewController *_controller;
     _background2 = [SKSpriteNode spriteNodeWithTexture:backgroundTexture size:CGSizeMake(_background1.size.width, _background1.size.height)];
     _background2.position = CGPointMake(_background1.size.width, CGRectGetMidY(self.frame));
     
-    SKTexture *playbuttonTexture = [SKTexture textureWithImage:[UIImage imageNamed:@"fireball.png"]];
+    SKTexture *playbuttonTexture = [SKTexture textureWithImage:[UIImage imageNamed:@"play.png"]];
     playbuttonTexture.filteringMode = SKTextureFilteringLinear;
-    SKSpriteNode *startButton = [SKSpriteNode spriteNodeWithTexture:playbuttonTexture size:CGSizeMake(80, 30)];
-    startButton.position = CGPointMake(CGRectGetMidX(self.frame) - 80, CGRectGetMidY(self.frame) - 30);
+    SKSpriteNode *startButton = [SKSpriteNode spriteNodeWithTexture:playbuttonTexture size:CGSizeMake(130, 130)];
+    startButton.position = CGPointMake(CGRectGetMidX(self.frame) - 75, CGRectGetMidY(self.frame) - 30);
     startButton.name = @"startButtonNode";
 
-    SKTexture *statbuttonTexture = [SKTexture textureWithImage:[UIImage imageNamed:@"fireball.png"]];
+    SKTexture *statbuttonTexture = [SKTexture textureWithImage:[UIImage imageNamed:@"stats.png"]];
     statbuttonTexture.filteringMode = SKTextureFilteringLinear;
-    SKSpriteNode *statButton = [SKSpriteNode spriteNodeWithTexture:statbuttonTexture size:CGSizeMake(80, 30)];
+    SKSpriteNode *statButton = [SKSpriteNode spriteNodeWithTexture:statbuttonTexture size:CGSizeMake(130, 130)];
     statButton.position = CGPointMake(CGRectGetMidX(self.frame) + 80, CGRectGetMidY(self.frame) - 30);
     statButton.name = @"statButtonNode";
 
@@ -77,22 +108,6 @@ static UIViewController *_controller;
     [self initGame];
 }
 
--(id)initWithSize:(CGSize)size {
-    if (self = [super initWithSize:size]) {
-        /* Setup your scene here */
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(replayAfterResult) name:@"kReplayGame" object:nil];
-        
-        NSError *error;
-        NSURL * backgroundMusicURL = [[NSBundle mainBundle] URLForResource:@"Game-Break" withExtension:@"mp3"];
-        _splashPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:backgroundMusicURL error:&error];
-        _splashPlayer.numberOfLoops = 1;
-        [_splashPlayer prepareToPlay];
-        [self createAdBannerView];
-        [self initMenuView];
-    }
-    return self;
-}
 
 - (void)initGame
 {
@@ -113,46 +128,55 @@ static UIViewController *_controller;
     {
         _countLabel = [SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
         _countLabel.fontSize = 30;
-        _countLabel.position = CGPointMake(50,
-                                           CGRectGetMaxY(self.frame) - 50);
+        _countLabel.position = CGPointMake(self.view.frame.size.width - 70,
+                                           CGRectGetMaxY(self.frame) - 80);
     }
     self.physicsBody = [SKPhysicsBody bodyWithEdgeLoopFromRect:self.frame];
     self.physicsWorld.contactDelegate = self;
     [self addChild:_countLabel];
     
-    if (_ship == nil)
+    if (_turtle == nil)
     {
-        _ship = [[SKSpriteNode alloc] init];
-        _ship = [SKSpriteNode spriteNodeWithImageNamed:@"egg.png"];
-        _ship.name = @"Ship";
-        _ship.size = CGSizeMake(40, 60);
-        _ship.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:_ship.size.width / 2];
-        _ship.physicsBody.dynamic = YES;
-        _ship.physicsBody.usesPreciseCollisionDetection = YES;
-        _ship.physicsBody.categoryBitMask = playerCategory;
+        _turtle = [SKSpriteNode spriteNodeWithImageNamed:@"egg.png"];
+        _turtle.name = @"Ship";
+        _turtle.size = CGSizeMake(50, 60);
+        _turtle.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:_turtle.size.width / 2];
+        _turtle.physicsBody.dynamic = YES;
+        _turtle.physicsBody.usesPreciseCollisionDetection = YES;
+        _turtle.physicsBody.categoryBitMask = playerCategory;
     }
-    _ship.position = CGPointMake(100, CGRectGetMidY(self.frame) + 200);
-    
+    [_turtle setTexture:[SKTexture textureWithImage:[UIImage imageNamed:@"egg.png"]]];
+    _turtle.position = CGPointMake(100, CGRectGetMidY(self.frame) + 200);
+    _bubbles.position = _turtle.position;
+    [self addChild:_bubbles];
+
+    [_bubbles runAction:[SKAction repeatActionForever:[SKAction animateWithTextures:_bubbleFrames
+                                                                       timePerFrame:0.4f
+                                                                             resize:NO
+                                                                            restore:YES]] withKey:@"bubbleAnimated"];
+
+
     SKAction *action = [SKAction rotateToAngle:2 * M_PI duration:1];
-    [_ship runAction:action];
-    
-    _adBannerView.alpha = 1.0f;
-    [self addChild:_ship];
+    [_turtle runAction:action];
+    [SKView animateWithDuration:0.5f animations:^{
+        _adBannerView.alpha = 1.0f;
+    }];
+    [self addChild:_turtle];
 }
 
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     /* Called when a touch begins */
-    if (!_menu)
+    if (!_menu && _shipAlive)
     {
-        _ship.physicsBody.velocity = self.physicsBody.velocity;
-        [_ship.physicsBody applyImpulse:CGVectorMake(0.0f, 25.0f)];
+        _turtle.physicsBody.velocity = self.physicsBody.velocity;
+        [_turtle.physicsBody applyImpulse:CGVectorMake(0.0f, 40.0f)];
         
         SKAction *rotationAction = [SKAction rotateByAngle:0.4 duration:0.2];
         SKAction *action = [SKAction sequence:@[rotationAction, [SKAction runBlock:^{
-            [_ship runAction:[SKAction rotateByAngle:-0.4 duration:0.5]];
+            [_turtle runAction:[SKAction rotateByAngle:-0.4 duration:0.5]];
         }]]];
-        [_ship runAction:[SKAction repeatAction:action count:1]];
+        [_turtle runAction:[SKAction repeatAction:action count:1]];
         [self runAction:[SKAction playSoundFileNamed:@"bubble.mp3" waitForCompletion:NO]];
     }
     else
@@ -197,15 +221,19 @@ static UIViewController *_controller;
 
 - (void)replayGame
 {
-    _adBannerView.alpha = 1.0f;
+    [SKView animateWithDuration:0.5f animations:^{
+        _adBannerView.alpha = 1.0f;
+    }];
     
     ResultViewController *result = [ResultViewController new];
-    result.count = _count - 3;
+    result.count = _count - 2;
     [_controller presentPopupViewController:result animationType:MJPopupViewAnimationSlideBottomTop];
 }
 
 - (void)didBeginContact:(SKPhysicsContact *)contact {
     [self runAction:[SKAction playSoundFileNamed:@"Game-Break.mp3" waitForCompletion:NO]];
+    [_bubbles removeFromParent];
+    [_turtle setTexture:[SKTexture textureWithImage:[UIImage imageNamed:@"deadPiggy.png"]]];
     if (_shipAlive == YES)
         [self performSelector:@selector(replayGame) withObject:self afterDelay:0.5f];
     _shipAlive = NO;
@@ -213,15 +241,26 @@ static UIViewController *_controller;
 
 - (void)generateFireBallForNode:(SKSpriteNode*)node
 {
-    if (arc4random() % 400 <= (2 + _count / 50))
+    if (arc4random() % 1000 <= (2 + _count / 50))
     {
-        FireBall *newFireBall = [FireBall spriteNodeWithTexture:[SKTexture textureWithImage:[UIImage imageNamed:@"fireball.png"]] size:CGSizeMake(25, 25)];
+        FireBall *newFireBall = [FireBall spriteNodeWithTexture:[SKTexture textureWithImage:[UIImage imageNamed:@"fireball.png"]] size:CGSizeMake(30, 30)];
         newFireBall.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:newFireBall.size.width / 2];
         newFireBall.physicsBody.dynamic = NO;
         newFireBall.physicsBody.categoryBitMask = fireballCategory;
         newFireBall.physicsBody.contactTestBitMask = playerCategory;
         newFireBall.physicsBody.collisionBitMask = 0;
-        newFireBall.position = CGPointMake(node.position.x, CGRectGetMaxY(node.frame));
+        
+        NSLog(@"node pos y = %f comparing to %f", node.position.y, (self.view.frame.size.height - (node.size.height / 2)));
+        if ((int)node.position.y == (int)(self.view.frame.size.height - (node.size.height / 2)))
+        {
+            newFireBall.position = CGPointMake(node.position.x, self.view.frame.size.height - node.size.height);
+            newFireBall.orientation = BOTTOM;
+        }
+        else
+        {
+            newFireBall.position = CGPointMake(node.position.x, CGRectGetMaxY(node.frame));
+            newFireBall.orientation = TOP;
+        }
         switch (_step) {
             case 1:
                 newFireBall.direction = None;
@@ -251,6 +290,7 @@ static UIViewController *_controller;
         return;
     _updatePosition += 2;
     
+    _bubbles.position = CGPointMake(_turtle.position.x + 20, _turtle.position.y + 40);
     [_background1 setPosition:CGPointMake(_background1.position.x - 2, _background1.position.y)];
     [_background2 setPosition:CGPointMake(_background2.position.x - 2, _background2.position.y)];
     if (_background2.position.x == 0 || _background2.position.x == 1)
@@ -258,25 +298,40 @@ static UIViewController *_controller;
     if (_background1.position.x == 0 || _background1.position.x == 1)
         [_background2 setPosition:CGPointMake(_background1.size.width, _background1.position.y)];
     
-    if (_count - 3 > 0)
+    if (_count - 2 > 0)
     {
         // hide iAd
-        _adBannerView.alpha = 0.0f;
+        [SKView animateWithDuration:0.5f animations:^{
+            _adBannerView.alpha = 0.0f;
+        }];
 
-        [_countLabel setText:[NSString stringWithFormat:@"%i", _count - 3]];
+        [_countLabel setText:[NSString stringWithFormat:@"%i", _count - 2]];
     }
     
-    if (_count > 0 && _updatePosition % 5000 == 0)
+    if (_count > 0 && _updatePosition % 3000 == 0)
         ++_step;
 
-    if (_updatePosition % 150 == 0)
+    if (_updatePosition % 150 == 0 && _shipAlive)
     {
         ++_count;
         SKSpriteNode *newPipe = [SKSpriteNode spriteNodeWithTexture:[SKTexture textureWithImage:[UIImage imageNamed:@"plante.png"]] size:CGSizeMake(50, 100)];
         newPipe.physicsBody = [SKPhysicsBody bodyWithEdgeLoopFromRect:newPipe.frame];
         newPipe.physicsBody.categoryBitMask = pipeCategory;
         newPipe.physicsBody.contactTestBitMask = playerCategory;
-        newPipe.position = CGPointMake(CGRectGetMaxX(self.frame) + 250, newPipe.size.height / 2);
+        
+        if (_step < 1)
+            newPipe.position = CGPointMake(150 + 250, newPipe.size.height / 2);
+        else
+        {
+            if (arc4random() % 2 == 1)
+            {
+                newPipe.yScale = -1;
+                newPipe.position = CGPointMake(150 + 250, self.view.frame.size.height - (newPipe.size.height / 2));
+            }
+            else
+                newPipe.position = CGPointMake(150 + 250, newPipe.size.height / 2);
+        }
+        
         [self addChild:newPipe];
         [_nodeList addObject:newPipe];
     }
@@ -293,13 +348,13 @@ static UIViewController *_controller;
     {
         switch (ball.direction) {
             case None:
-                ball.position = CGPointMake(ball.position.x - 2, ball.position.y + 2);
+                ball.position = CGPointMake(ball.position.x - 2, ball.orientation == TOP ? ball.position.y + 2 : ball.position.y - 2);
                 break;
             case Left:
-                ball.position = CGPointMake(ball.position.x - 3, ball.position.y + 2);
+                ball.position = CGPointMake(ball.position.x - 3, ball.orientation == TOP ? ball.position.y + 2 : ball.position.y - 2);
                 break;
             case Right:
-                ball.position = CGPointMake(ball.position.x - 1, ball.position.y + 2);
+                ball.position = CGPointMake(ball.position.x - 1, ball.orientation == TOP ? ball.position.y + 2 : ball.position.y - 2);
                 break;
             default:
                 break;
@@ -337,7 +392,6 @@ static UIViewController *_controller;
 - (void)bannerViewDidLoadAd:(ADBannerView *)banner
 {
     [self adjustBannerView];
-    
 }
 
 - (void)bannerView:(ADBannerView *)banner didFailToReceiveAdWithError:(NSError *)error
